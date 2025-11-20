@@ -1,0 +1,27 @@
+# Virtual environment
+venv/
+env/
+
+# Python bytecode
+*.pyc
+*.pyo
+__pycache__/
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Test-related files
+.pytest_cache/
+.coverage/
+htmlcov/
+
+# Sensitive files
+.env
+setenv.sh
+
