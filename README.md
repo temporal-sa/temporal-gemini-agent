@@ -36,8 +36,7 @@ The implementation uses the following architecture:
 ### Install Dependencies
 
 ```bash
-cd gemini_project
-export GOOGLE_API_KEY=your-api-key-here
+cd temporal-gemini-agent
 uv sync
 ```
 
@@ -48,7 +47,8 @@ uv sync
 In one terminal:
 
 ```bash
-cd gemini_project
+cd temporal-gemini-agent
+export GOOGLE_API_KEY=your-api-key-here
 uv run python -m worker
 ```
 
@@ -57,7 +57,7 @@ uv run python -m worker
 In another terminal:
 
 ```bash
-cd gemini_project
+cd temporal-gemini-agent
 uv run python -m start_workflow "where am I?"
 uv run python -m start_workflow "are there any weather alerts for where I am?"
 uv run python -m start_workflow "what is my ip address?"
