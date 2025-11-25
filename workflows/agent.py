@@ -1,6 +1,7 @@
 from temporalio import workflow
 from datetime import timedelta
-from typing import Any
+from typing import Any, Union
+from dataclasses import dataclass
 
 import json
 
@@ -8,6 +9,26 @@ with workflow.unsafe.imports_passed_through():
     from tools import get_tools
     from helpers import tool_helpers
     from activities import gemini_responses
+
+@dataclass
+class FunctionCallOutput:
+    """Represents a function call in the model's response."""
+    type: str  # Always "function_call"
+    name: str
+    call_id: str
+    arguments: dict[str, Any]
+
+@dataclass
+class MessageOutput:
+    """Represents a message in the model's response."""
+    type: str  # Always "message"
+    content: str
+
+@dataclass
+class GeminiResponse:
+    """Parsed Gemini response containing output items and text."""
+    output: list[Union[FunctionCallOutput, MessageOutput]]
+    output_text: str
 
 def build_history_from_input(input_list: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], str]:
     """
@@ -64,12 +85,12 @@ def build_history_from_input(input_list: list[dict[str, Any]]) -> tuple[list[dic
 
     return history, prompt
 
-def parse_gemini_response(raw_response: dict[str, Any]) -> dict[str, Any]:
+def parse_gemini_response(raw_response: dict[str, Any]) -> GeminiResponse:
     """
     Parse the raw Gemini response and convert to output structure.
-    Returns a dict with 'output' (list of items) and 'output_text' (str).
+    Returns a GeminiResponse dataclass with 'output' (list of items) and 'output_text' (str).
     """
-    output = []
+    output: list[Union[FunctionCallOutput, MessageOutput]] = []
     output_text = ""
 
     parts = raw_response.get("parts", [])
@@ -78,24 +99,24 @@ def parse_gemini_response(raw_response: dict[str, Any]) -> dict[str, Any]:
         if "function_call" in part:
             # Tool call detected
             function_call = part["function_call"]
-            output.append({
-                "type": "function_call",
-                "name": function_call["name"],
-                "call_id": function_call["name"],  # Use name as call_id
-                "arguments": function_call["args"]
-            })
+            output.append(FunctionCallOutput(
+                type="function_call",
+                name=function_call["name"],
+                call_id=function_call["name"],  # Use name as call_id
+                arguments=function_call["args"]
+            ))
         elif "text" in part:
             # Text response
             output_text += part["text"]
 
     # If no tool calls, add text as message output
-    if not any(item.get("type") == "function_call" for item in output):
-        output.append({
-            "type": "message",
-            "content": output_text
-        })
+    if not any(isinstance(item, FunctionCallOutput) for item in output):
+        output.append(MessageOutput(
+            type="message",
+            content=output_text
+        ))
 
-    return {"output": output, "output_text": output_text}
+    return GeminiResponse(output=output, output_text=output_text)
 
 @workflow.defn
 class AgentGeminiWorkflow:
@@ -131,45 +152,44 @@ class AgentGeminiWorkflow:
             # For this simple example, we only have one item in the output list
             # Either the LLM will have chosen a single function call or it will
             # have chosen to respond with a message.
-            item = result["output"][0]
+            item = result.output[0]
 
             # Now process the LLM output to either call a tool or respond with a message.
-            # Note: After deserialization, item is a dict, not a GeminiOutputItem object
 
             # if the result is a tool call, call the tool
-            if isinstance(item, dict) and item.get("type") == "function_call":
+            if isinstance(item, FunctionCallOutput):
                 tool_result = await self._handle_function_call(item, result, input_list)
 
                 # add the tool call result to the input list for context
                 input_list.append({"type": "function_call_output",
-                                    "call_id": item["call_id"],
+                                    "call_id": item.call_id,
                                     "output": tool_result})
 
             # if the result is not a tool call we will just respond with a message
             else:
-                print(f"No tools chosen, responding with a message: {result['output_text']}")
-                return result["output_text"]
+                print(f"No tools chosen, responding with a message: {result.output_text}")
+                return result.output_text
 
 
-    async def _handle_function_call(self, item, result, input_list):
+    async def _handle_function_call(self, item: FunctionCallOutput, result: GeminiResponse, input_list):
         # serialize the LLM output - the decision the LLM made to call a tool
         input_list.append({
             "type": "function_call",
-            "name": item["name"],
-            "call_id": item["call_id"],
-            "arguments": item["arguments"]
+            "name": item.name,
+            "call_id": item.call_id,
+            "arguments": item.arguments
         })
 
         # execute dynamic activity with the tool name chosen by the LLM
         # and the arguments crafted by the LLM
-        args = item["arguments"]
+        args = item.arguments
 
         tool_result = await workflow.execute_activity(
-            item["name"],
+            item.name,
             args,
             start_to_close_timeout=timedelta(seconds=30),
         )
 
-        print(f"Made a tool call to {item['name']}")
+        print(f"Made a tool call to {item.name}")
 
         return tool_result
