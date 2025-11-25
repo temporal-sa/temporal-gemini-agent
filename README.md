@@ -11,7 +11,7 @@ This example implements a basic agentic loop using Google's Gemini API with func
 
 ## Key Differences from OpenAI Version
 
-- Uses Google's Gemini API (`google-generativeai` library) instead of OpenAI
+- Uses Google's Gemini API (`google-genai` SDK) instead of OpenAI
 - Tool definitions use Gemini's `function_declarations` format
 - Uses `httpx` for async HTTP requests (replacing `requests`)
 - Model: `gemini-2.0-flash-exp`

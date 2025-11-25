@@ -30,7 +30,7 @@ def build_history_from_input(input_list: list[dict[str, Any]]) -> tuple[list[dic
         if item.get("type") == "message":
             history.append({
                 "role": item["role"],
-                "parts": [item["content"]]
+                "parts": [{"text": item["content"]}]
             })
         elif item.get("type") == "function_call":
             # Model's tool call
@@ -44,9 +44,9 @@ def build_history_from_input(input_list: list[dict[str, Any]]) -> tuple[list[dic
                 }]
             })
         elif item.get("type") == "function_call_output":
-            # Tool response
+            # Tool response (sent as user role with function_response part)
             history.append({
-                "role": "function",
+                "role": "user",
                 "parts": [{
                     "function_response": {
                         "name": item["call_id"],

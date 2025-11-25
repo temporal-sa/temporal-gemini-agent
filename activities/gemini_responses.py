@@ -1,8 +1,8 @@
 from temporalio import activity
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dataclasses import dataclass
 from typing import Any
-import os
 
 # Temporal best practice: Create a data structure to hold the request parameters.
 @dataclass
@@ -37,23 +37,36 @@ def serialize_response(response: Any) -> dict[str, Any]:
 async def create(request: GeminiResponsesRequest) -> dict[str, Any]:
     """
     Invoke Gemini API with pre-built conversation history and tools.
-    Returns the raw response from chat.send_message_async() in serializable format.
+    Returns the raw response from generate_content() in serializable format.
     """
-    # Configure Gemini API
-    genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+    # Create Gemini client (automatically picks up GOOGLE_API_KEY from environment)
+    client = genai.Client()
 
-    # Create model with system instructions and tools
-    model = genai.GenerativeModel(
-        request.model,
+    # Create config with system instructions and tools
+    config = types.GenerateContentConfig(
         system_instruction=request.instructions,
         tools=request.tools
     )
 
-    # Start chat with pre-built history
-    chat = model.start_chat(history=request.history)
+    # Build contents list from history + current prompt
+    contents = []
 
-    # Send the prompt
-    response = await chat.send_message_async(request.prompt)
+    # Add all history items
+    for history_item in request.history:
+        contents.append(history_item)
+
+    # Add the current prompt as a user message
+    contents.append({
+        "role": "user",
+        "parts": [{"text": request.prompt}]
+    })
+
+    # Generate content with full conversation history
+    response = await client.aio.models.generate_content(
+        model=request.model,
+        contents=contents,
+        config=config
+    )
 
     # Serialize and return response
     return serialize_response(response)
