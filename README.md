@@ -58,9 +58,9 @@ In another terminal:
 
 ```bash
 cd temporal-gemini-agent
-uv run python -m start_workflow "where am I?"
-uv run python -m start_workflow "are there any weather alerts for where I am?"
-uv run python -m start_workflow "what is my ip address?"
+uv run -m start_workflow "where am I?"
+uv run -m start_workflow "are there any weather alerts for where I am?"
+uv run -m start_workflow "what is my ip address?"
 q
 ```
 
