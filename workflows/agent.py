@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 import json
 
+from activities.tool_invoker import invoke_tool, ToolArguments
+
 with workflow.unsafe.imports_passed_through():
     from tools import get_tools
     from helpers import tool_helpers
@@ -180,14 +182,14 @@ class AgentGeminiWorkflow:
             "arguments": item.arguments
         })
 
-        # execute dynamic activity with the tool name chosen by the LLM
-        # and the arguments crafted by the LLM
-        args = item.arguments
+        # execute activity with the tool name and arguments
+        tool_args = ToolArguments(item.name, item.arguments)
 
         tool_result = await workflow.execute_activity(
-            item.name,
-            args,
+            invoke_tool,
+            tool_args,
             start_to_close_timeout=timedelta(seconds=30),
+            summary=item.name,
         )
 
         print(f"Made a tool call to {item.name}")

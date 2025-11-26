@@ -24,7 +24,7 @@ async def main():
         ],
         activities=[
             gemini_responses.create,
-            tool_invoker.dynamic_tool_activity,
+            tool_invoker.invoke_tool,
         ],
         activity_executor=ThreadPoolExecutor(max_workers=10),
     )
