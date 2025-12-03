@@ -148,9 +148,9 @@ class AgentGeminiWorkflow:
                 start_to_close_timeout=timedelta(seconds=30),
             )
 
-            print("---- raw response ---- ")
-            print(f"{raw_response}")
-            print("--- end raw response ---")
+            # print("---- raw response ---- ")
+            # print(f"{raw_response}")
+            # print("--- end raw response ---")
 
             # Parse the raw response
             result = parse_gemini_response(raw_response)
