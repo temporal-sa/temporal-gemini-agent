@@ -4,7 +4,7 @@ import uuid
 
 from temporalio.client import Client
 
-from workflows.agent import AgentGeminiWorkflow
+from gemini_agent.workflows.agent import AgentGeminiWorkflow
 from temporalio.contrib.pydantic import pydantic_data_converter
 
 

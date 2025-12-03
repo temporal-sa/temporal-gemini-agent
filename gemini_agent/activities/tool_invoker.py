@@ -13,7 +13,7 @@ class ToolArguments:
 
 @activity.defn
 async def invoke_tool(tool_args: ToolArguments) -> Any:
-    from tools import get_handler
+    from gemini_agent.tools import get_handler
 
     activity.logger.info(f"Running dynamic tool '{tool_args.tool_name}' with args: {tool_args.args}")
 

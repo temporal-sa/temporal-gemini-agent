@@ -3,8 +3,8 @@ import asyncio
 from temporalio.client import Client
 from temporalio.worker import Worker
 
-from workflows.agent import AgentGeminiWorkflow
-from activities import gemini_responses, tool_invoker
+from gemini_agent.workflows.agent import AgentGeminiWorkflow
+from gemini_agent.activities import gemini_responses, tool_invoker
 from temporalio.contrib.pydantic import pydantic_data_converter
 
 from concurrent.futures import ThreadPoolExecutor

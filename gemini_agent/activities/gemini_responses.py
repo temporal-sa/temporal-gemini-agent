@@ -42,6 +42,8 @@ async def create(request: GeminiResponsesRequest) -> dict[str, Any]:
     # Create Gemini client (automatically picks up GOOGLE_API_KEY from environment)
     client = genai.Client()
 
+    print(f"Create: request is {request}")
+
     # Create config with system instructions and tools
     config = types.GenerateContentConfig(
         system_instruction=request.instructions,

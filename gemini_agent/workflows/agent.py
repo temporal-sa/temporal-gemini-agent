@@ -5,12 +5,12 @@ from dataclasses import dataclass
 
 import json
 
-from activities.tool_invoker import invoke_tool, ToolArguments
+from gemini_agent.activities.tool_invoker import invoke_tool, ToolArguments
 
 with workflow.unsafe.imports_passed_through():
-    from tools import get_tools
-    from helpers import tool_helpers
-    from activities import gemini_responses
+    from gemini_agent.tools import get_tools
+    from gemini_agent.helpers import tool_helpers
+    from gemini_agent.activities import gemini_responses
 
 @dataclass
 class FunctionCallOutput:
@@ -147,6 +147,10 @@ class AgentGeminiWorkflow:
                 ),
                 start_to_close_timeout=timedelta(seconds=30),
             )
+
+            print("---- raw response ---- ")
+            print(f"{raw_response}")
+            print("--- end raw response ---")
 
             # Parse the raw response
             result = parse_gemini_response(raw_response)

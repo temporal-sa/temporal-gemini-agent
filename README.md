@@ -39,6 +39,11 @@ The implementation uses the following architecture:
 cd temporal-gemini-agent
 uv sync
 ```
+## Running the unit test(s)
+```bash
+cd temporal-gemini-agent
+uv run pytest -v
+```
 
 ## Running the Agent
 
