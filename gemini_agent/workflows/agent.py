@@ -139,7 +139,7 @@ class AgentGeminiWorkflow:
             raw_response = await workflow.execute_activity(
                 gemini_responses.create,
                 gemini_responses.GeminiResponsesRequest(
-                    model="gemini-2.0-flash-exp",
+                    model="gemini-3-flash-preview",
                     instructions=tool_helpers.HELPFUL_AGENT_SYSTEM_INSTRUCTIONS,
                     history=history,
                     prompt=prompt,
