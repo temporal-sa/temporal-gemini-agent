@@ -5,7 +5,6 @@ from temporalio.worker import Worker
 
 from gemini_agent.workflows.agent import AgentGeminiWorkflow
 from gemini_agent.activities import gemini_responses, tool_invoker
-from temporalio.contrib.pydantic import pydantic_data_converter
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -13,7 +12,6 @@ from concurrent.futures import ThreadPoolExecutor
 async def main():
     client = await Client.connect(
         "localhost:7233",
-        data_converter=pydantic_data_converter,
     )
 
     worker = Worker(

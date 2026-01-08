@@ -1,12 +1,10 @@
 from temporalio import activity
 from google import genai
 from google.genai import types
-from dataclasses import dataclass
-from typing import Any
+from typing import TypedDict, Any
 
 # Temporal best practice: Create a data structure to hold the request parameters.
-@dataclass
-class GeminiResponsesRequest:
+class GeminiResponsesRequest(TypedDict):
     model: str
     instructions: str
     history: list[dict[str, Any]]
@@ -46,26 +44,26 @@ async def create(request: GeminiResponsesRequest) -> dict[str, Any]:
 
     # Create config with system instructions and tools
     config = types.GenerateContentConfig(
-        system_instruction=request.instructions,
-        tools=request.tools
+        system_instruction=request["instructions"],
+        tools=request["tools"]
     )
 
     # Build contents list from history + current prompt
     contents = []
 
     # Add all history items
-    for history_item in request.history:
+    for history_item in request["history"]:
         contents.append(history_item)
 
     # Add the current prompt as a user message
     contents.append({
         "role": "user",
-        "parts": [{"text": request.prompt}]
+        "parts": [{"text": request["prompt"]}]
     })
 
     # Generate content with full conversation history
     response = await client.aio.models.generate_content(
-        model=request.model,
+        model=request["model"],
         contents=contents,
         config=config
     )

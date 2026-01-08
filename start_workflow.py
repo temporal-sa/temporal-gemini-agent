@@ -5,13 +5,11 @@ import uuid
 from temporalio.client import Client
 
 from gemini_agent.workflows.agent import AgentGeminiWorkflow
-from temporalio.contrib.pydantic import pydantic_data_converter
 
 
 async def main():
     client = await Client.connect(
         "localhost:7233",
-        data_converter=pydantic_data_converter,
     )
 
     query = sys.argv[1] if len(sys.argv) > 1 else "Tell me about recursion"
